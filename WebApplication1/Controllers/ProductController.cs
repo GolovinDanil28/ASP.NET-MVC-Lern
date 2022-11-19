@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Collections.Generic;
 using System.Linq;
 using WebApplication1.Data;
@@ -29,6 +30,14 @@ namespace WebApplication1.Controllers
         //Get Upsert
         public IActionResult Upsert(int? id)
         {
+            IEnumerable<SelectListItem> CategoryDropDown = _db.Category.Select(i => new SelectListItem
+            {
+                Text = i.Name,
+                Value = i.Id.ToString()
+            });
+
+            ViewBag.CategoryDropDown = CategoryDropDown;
+
             Product product = new Product();
             if (id == null)
             {
