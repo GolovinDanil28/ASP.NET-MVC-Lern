@@ -26,11 +26,11 @@ namespace WebApplication1.Controllers
 
         public IActionResult Index()
         {
-            IEnumerable<Product> objList = _db.Product;
-            foreach (var obj in objList)
-            {
-                obj.Category = _db.Category.FirstOrDefault(u => u.Id == obj.CategoryId);
-            }
+            IEnumerable<Product> objList = _db.Product.Include(u => u.Category).Include(u => u.ApplicationType);
+            //foreach (var obj in objList)
+            //{
+            //    //obj.Category = _db.Category.FirstOrDefault(u => u.Id == obj.CategoryId);
+            //}
 
             return View(objList);
         }
