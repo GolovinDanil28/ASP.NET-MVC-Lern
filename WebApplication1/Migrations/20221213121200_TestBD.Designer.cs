@@ -9,8 +9,8 @@ using WebApplication1.Data;
 namespace WebApplication1.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20221127160429_AddApplicationTypeProduct")]
-    partial class AddApplicationTypeProduct
+    [Migration("20221213121200_TestBD")]
+    partial class TestBD
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -62,7 +62,7 @@ namespace WebApplication1.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int>("ApplicationId")
+                    b.Property<int>("ApplicationTypeId")
                         .HasColumnType("int");
 
                     b.Property<int>("CategoryId")
@@ -81,9 +81,12 @@ namespace WebApplication1.Migrations
                     b.Property<double>("Price")
                         .HasColumnType("float");
 
+                    b.Property<string>("ShortDesc")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("ApplicationId");
+                    b.HasIndex("ApplicationTypeId");
 
                     b.HasIndex("CategoryId");
 
@@ -94,7 +97,7 @@ namespace WebApplication1.Migrations
                 {
                     b.HasOne("WebApplication1.Models.ApplicationType", "ApplicationType")
                         .WithMany()
-                        .HasForeignKey("ApplicationId")
+                        .HasForeignKey("ApplicationTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
