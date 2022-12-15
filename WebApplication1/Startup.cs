@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Builder;
+ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.EntityFrameworkCore;
@@ -28,7 +28,13 @@ namespace WebApplication1
             services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(
                 Configuration.GetConnectionString("DefaultConnection")));
-
+            services.AddHttpContextAccessor();
+            services.AddSession(Options =>
+            {
+                Options.IdleTimeout = TimeSpan.FromMinutes(10);
+                Options.Cookie.HttpOnly = true;
+                Options.Cookie.IsEssential = true;
+            });
             services.AddControllersWithViews();
         }
 
@@ -51,6 +57,8 @@ namespace WebApplication1
             app.UseRouting();
 
             app.UseAuthorization();
+            app.UseSession();
+
 
             app.UseEndpoints(endpoints =>
             {
