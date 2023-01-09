@@ -1,9 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Claims;
+using System.Text;
+using System.Threading.Tasks;
 using WebApplication1.Data;
 using WebApplication1.Models;
 using WebApplication1.Models.ViewModels;
@@ -15,13 +20,17 @@ namespace WebApplication1.Controllers
     public class CartController : Controller
     {
         private readonly ApplicationDbContext _db;
+        private readonly IWebHostEnvironment _webHostEnviroment;
+        private readonly IEmailSender _emailSender;
 
         [BindProperty]
         public ProductUserVM ProductUserVM { get; set; }
 
-        public CartController(ApplicationDbContext db)
+        public CartController(ApplicationDbContext db, IWebHostEnvironment webHostEnvironment, IEmailSender emailSender)
         {
             _db = db;
+            _webHostEnviroment = webHostEnvironment;
+            _emailSender = emailSender;
         }
 
         public IActionResult Index()
@@ -93,9 +102,34 @@ namespace WebApplication1.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [ActionName("Summary")]
-        public IActionResult SummaryPost(ProductUserVM productUserVM)
+        public async Task <IActionResult> SummaryPost(ProductUserVM productUserVM)
         {
-            
+            var PathToTemplate = _webHostEnviroment.WebRootPath + Path.DirectorySeparatorChar.ToString()
+                + "templates" + Path.DirectorySeparatorChar.ToString() +
+                "Inquiry.html";
+            var subject = "New Inquiry";
+            string HtmlBody = "";
+            using (StreamReader sr = System.IO.File.OpenText(PathToTemplate))
+            {
+                HtmlBody = sr.ReadToEnd();
+            }
+
+
+            StringBuilder productListSB = new StringBuilder();
+            foreach(var prod in productUserVM.ProductList)
+            {
+                productListSB.Append($" - Name: {prod.Name} <span style = 'font-size:14px;' > (ID: {prod.Id})</span></br>");
+            }
+
+            string messageBody = string.Format(HtmlBody,
+                ProductUserVM.ApplicationUser.FullName,
+                ProductUserVM.ApplicationUser.Email,
+                ProductUserVM.ApplicationUser.PhoneNumber,
+                productListSB.ToString());
+
+
+            await _emailSender.SendEmailAsync(WC.EmailAdmin, subject, messageBody);
+
             return RedirectToAction(nameof(InquiryConfirmation));
         }
         public IActionResult InquiryConfirmation()
